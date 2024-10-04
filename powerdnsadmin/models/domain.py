@@ -216,6 +216,7 @@ class Domain(db.Model):
             domain.serial = data['serial']
             domain.notified_serial = data['notified_serial']
             domain.last_check = 1 if data['last_check'] else 0
+            domain.account_id = account_id
             # FIX for ?dnssec=false to improve performance            
             if 'dnssec' in data:
                 domain.dnssec = 1 if data['dnssec'] else 0
