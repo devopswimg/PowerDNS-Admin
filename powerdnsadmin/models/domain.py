@@ -208,17 +208,17 @@ class Domain(db.Model):
                 or domain.serial != data['serial']
                 or domain.notified_serial != data['notified_serial']
                 or domain.last_check != (1 if data['last_check'] else 0)
-                or domain.dnssec != (1 if data.get('dnssec', False) else 0)
-                or domain.account_id != account_id):
-
+                or domain.account_id != account_id
+                or ('dnssec' in data and domain.dnssec != (1 if data['dnssec'] else 0))
+                ):
             domain.master = str(data['masters'])
             domain.type = data['kind']
             domain.serial = data['serial']
             domain.notified_serial = data['notified_serial']
             domain.last_check = 1 if data['last_check'] else 0
             # FIX for ?dnssec=false to improve performance            
-            domain.dnssec = 1 if data.get('dnssec', False) else 0
-            domain.account_id = account_id
+            if 'dnssec' in data:
+                domain.dnssec = 1 if data['dnssec'] else 0
             try:
                 if do_commit:
                     db.session.commit()
@@ -322,7 +322,8 @@ class Domain(db.Model):
         d.serial = domain['serial']
         d.notified_serial = domain['notified_serial']
         d.last_check = domain['last_check']
-        d.dnssec = 1 if domain['dnssec'] else 0
+        # FIX for ?dnssec=false to improve performance
+        d.dnssec = 1 if domain.get('dnssec',False) else 0
         d.account_id = account_id
         db.session.add(d)
         try:
